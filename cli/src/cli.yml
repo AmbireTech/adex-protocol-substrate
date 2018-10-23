@@ -1,0 +1,12 @@
+name: 
+author: "AdEx Network <office@adex.network>"
+about: AdEx Protocol
+args:
+  - log:
+      short: l
+      value_name: LOG_PATTERN
+      help: Sets a custom logging
+      takes_value: true
+subcommands:
+  - validator:
+      about: Run validator node
