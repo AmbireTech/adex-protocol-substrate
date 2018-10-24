@@ -1,7 +1,7 @@
 //! Substrate chain configurations.
 
 use primitives::{AuthorityId, ed25519};
-use node_runtime::{AccountId, GenesisConfig, ConsensusConfig, TimestampConfig, BalancesConfig, UpgradeKeyConfig, DemoConfig};
+use node_runtime::{AccountId, GenesisConfig, ConsensusConfig, TimestampConfig, BalancesConfig, UpgradeKeyConfig, AdExConfig};
 use substrate_service;
 
 // Note this is the URL for the telemetry server
@@ -32,7 +32,7 @@ fn testnet_genesis(initial_authorities: Vec<AuthorityId>, endowed_accounts: Vec<
 		upgrade_key: Some(UpgradeKeyConfig {
 			key: upgrade_key,
 		}),
-        demo: Some(DemoConfig {
+        adex_v3: Some(AdExConfig {
 			payment: 1000,
 		}),
 	}

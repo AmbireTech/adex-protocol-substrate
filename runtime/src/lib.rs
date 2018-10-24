@@ -50,7 +50,7 @@ pub use balances::Call as BalancesCall;
 pub use runtime_primitives::{Permill, Perbill};
 pub use timestamp::BlockPeriod;
 pub use srml_support::{StorageValue, RuntimeMetadata};
-mod demo;
+mod adex_v3;
 
 /// Alias to Ed25519 pubkey that identifies an account on the chain.
 pub type AccountId = primitives::H256;
@@ -171,7 +171,7 @@ impl upgrade_key::Trait for Runtime {
 	type Event = Event;
 }
 
-impl demo::Trait for Runtime {}
+impl adex_v3::Trait for Runtime {}
 
 construct_runtime!(
 	pub enum Runtime with Log(InternalLog: DigestItem<Hash, AuthorityId>) where
@@ -182,7 +182,7 @@ construct_runtime!(
 		Timestamp: timestamp::{Module, Call, Storage, Config<T>, Inherent},
 		Consensus: consensus::{Module, Call, Storage, Config<T>, Log(AuthoritiesChange), Inherent},
 		Balances: balances,
-        Demo: demo::{Module, Call, Storage, Config<T>},
+        AdEx: adex_v3::{Module, Call, Storage, Config<T>},
 		UpgradeKey: upgrade_key,
 	}
 );
