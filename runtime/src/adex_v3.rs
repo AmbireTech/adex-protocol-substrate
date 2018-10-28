@@ -6,14 +6,14 @@ pub trait Trait: balances::Trait {}
 
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
 #[derive(Encode, Decode, Clone, PartialEq, Eq)]
-pub struct Bid<AccountId> {
+pub struct Bid<AccountId, Balance> {
     advertiser: AccountId,
-    //total_reward: Balance,
+    total_reward: Balance,
 }
 
 decl_module! {
 	pub struct Module<T: Trait> for enum Call where origin: T::Origin {
-		fn commitment_start(origin, bid: Bid<T::AccountId>) -> Result;
+		fn commitment_start(origin, bid: Bid<T::AccountId, T::Balance>, bal: T::Balance) -> Result;
 		//fn commitment_finalize(origin, commitment: Commitment<T::AccountId, T::Balance>) -> Result;
 	}
 }
@@ -27,7 +27,7 @@ decl_storage! {
 }
 
 impl<T: Trait> Module<T> {
-	fn commitment_start(origin: T::Origin, bid: Bid<T::AccountId>) -> Result {
+	fn commitment_start(origin: T::Origin, bid: Bid<T::AccountId, T::Balance>, bal: T::Balance) -> Result {
 		let sender = ensure_signed(origin)?;
 	
 		//<balances::Module<T>>::decrease_free_balance(&sender, payment)?;

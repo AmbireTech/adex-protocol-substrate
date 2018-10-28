@@ -64,6 +64,10 @@ pub type BlockNumber = u64;
 /// Index of an account's extrinsic in the chain.
 pub type Nonce = u64;
 
+pub type Balance = u128;
+
+pub type AccountIndex = u64;
+
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
 /// of data like extrinsics, allowing for them to continue syncing the network through upgrades
@@ -153,11 +157,11 @@ impl timestamp::Trait for Runtime {
 }
 
 impl balances::Trait for Runtime {
-	/// The type for recording an account's balance.
-	type Balance = u128;
+    /// The type for recording an account's balance.
+	type Balance = Balance;
 	/// The type for recording indexing into the account enumeration. If this ever overflows, there
 	/// will be problems!
-	type AccountIndex = u32;
+	type AccountIndex = AccountIndex;
 	/// What to do if an account's free balance gets zeroed.
 	type OnFreeBalanceZero = ();
 	/// Restrict whether an account can transfer funds. We don't place any further restrictions.
