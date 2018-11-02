@@ -1,19 +1,27 @@
 use parity_codec::Encode;
 use srml_support::{StorageValue, dispatch::Result};
 use {balances, system::{self, ensure_signed}};
+use runtime_primitives::traits::Member;
 
 pub trait Trait: balances::Trait {}
 
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
 #[derive(Encode, Decode, Clone, PartialEq, Eq)]
-pub struct Bid<AccountId, Balance> {
+pub struct Bid<AccountId, Balance> where AccountId: Member, Balance: Member {
+	#[cfg_attr(feature = "std", serde(deserialize_with="Balance::deserialize"))]
+    balance: Balance,
+	#[cfg_attr(feature = "std", serde(deserialize_with="AccountId::deserialize"))]
     advertiser: AccountId,
-    total_reward: Balance,
 }
 
 decl_module! {
 	pub struct Module<T: Trait> for enum Call where origin: T::Origin {
-		fn commitment_start(origin, bid: Bid<T::AccountId, T::Balance>) -> Result;
+		fn commitment_start(origin, bid: Bid<T::AccountId, T::AccountId>) -> Result {
+            let sender = ensure_signed(origin)?;
+
+		    //<balances::Module<T>>::decrease_free_balance(&sender, payment)?;
+		    Ok(())
+        }
 		//fn commitment_finalize(origin, commitment: Commitment<T::AccountId, T::Balance>) -> Result;
 	}
 }
@@ -27,13 +35,6 @@ decl_storage! {
 }
 
 impl<T: Trait> Module<T> {
-	fn commitment_start(origin: T::Origin, bid: Bid<T::AccountId, T::Balance>) -> Result {
-		let sender = ensure_signed(origin)?;
-	
-		//<balances::Module<T>>::decrease_free_balance(&sender, payment)?;
-		Ok(())
-	}
-
     //fn commitment_finalize(_: T::Origin, commitment: Commitment<T::AccountId, T::Balance>) -> Result {
     //    Ok(())
     //}
