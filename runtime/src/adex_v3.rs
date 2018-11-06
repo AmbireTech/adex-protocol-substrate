@@ -7,22 +7,26 @@ pub trait Trait: balances::Trait {}
 
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
 #[derive(Encode, Decode, Clone, PartialEq, Eq)]
-pub struct Bid<AccountId, Balance> where AccountId: Member, Balance: Member {
-	#[cfg_attr(feature = "std", serde(deserialize_with="Balance::deserialize"))]
-    balance: Balance,
+pub struct Channel<AccountId, Balance> where AccountId: Member, Balance: Member {
 	#[cfg_attr(feature = "std", serde(deserialize_with="AccountId::deserialize"))]
-    advertiser: AccountId,
+    creator: AccountId,
+	#[cfg_attr(feature = "std", serde(deserialize_with="Balance::deserialize"))]
+    deposit: Balance,
+    // validators, validUntil, spec
+    validators: Vec<AccountId>,
+    validUntil: u64,
+    spec: Vec<u8>,
 }
 
 decl_module! {
 	pub struct Module<T: Trait> for enum Call where origin: T::Origin {
-		fn commitment_start(origin, bid: Bid<T::AccountId, T::AccountId>) -> Result {
+		fn channel_start(origin, bid: Channel<T::AccountId, T::AccountId>) -> Result {
             let sender = ensure_signed(origin)?;
 
 		    //<balances::Module<T>>::decrease_free_balance(&sender, payment)?;
 		    Ok(())
         }
-		//fn commitment_finalize(origin, commitment: Commitment<T::AccountId, T::Balance>) -> Result;
+		//fn channel_finalize(origin, channel: Commitment<T::AccountId, T::Balance>) -> Result;
 	}
 }
 
@@ -30,12 +34,12 @@ decl_storage! {
 	trait Store for Module<T: Trait> as AdExV3 {
 		Payment get(payment) config(): Option<T::Balance>;
         // @TODO Balance should carry multiple tokens
-        // @TODO system to clean-up old commitments
+        // @TODO system to clean-up old channels
 	}
 }
 
 impl<T: Trait> Module<T> {
-    //fn commitment_finalize(_: T::Origin, commitment: Commitment<T::AccountId, T::Balance>) -> Result {
+    //fn channel_finalize(_: T::Origin, channel: Commitment<T::AccountId, T::Balance>) -> Result {
     //    Ok(())
     //}
 }
