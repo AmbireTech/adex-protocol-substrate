@@ -12,15 +12,14 @@ pub struct Channel<AccountId, Balance> where AccountId: Member, Balance: Member 
     creator: AccountId,
 	#[cfg_attr(feature = "std", serde(deserialize_with="Balance::deserialize"))]
     deposit: Balance,
-    // validators, validUntil, spec
-    validators: Vec<AccountId>,
-    validUntil: u64,
+    //validators: Vec<AccountId>,
+    valid_until: u64,
     spec: Vec<u8>,
 }
 
 decl_module! {
 	pub struct Module<T: Trait> for enum Call where origin: T::Origin {
-		fn channel_start(origin, bid: Channel<T::AccountId, T::AccountId>) -> Result {
+		fn channel_start(origin, channel: Channel<T::AccountId, T::AccountId>) -> Result {
             let sender = ensure_signed(origin)?;
 
 		    //<balances::Module<T>>::decrease_free_balance(&sender, payment)?;
