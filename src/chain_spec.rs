@@ -1,5 +1,5 @@
 use primitives::{AuthorityId, ed25519};
-use adex_protocol_substrate_runtime::{AccountId, GenesisConfig, ConsensusConfig, TimestampConfig, BalancesConfig, UpgradeKeyConfig};
+use adex_protocol_substrate_runtime::{AccountId, GenesisConfig, ConsensusConfig, TimestampConfig, BalancesConfig, UpgradeKeyConfig, AdExConfig};
 use substrate_service;
 
 // Note this is the URL for the telemetry server
@@ -99,5 +99,9 @@ fn testnet_genesis(initial_authorities: Vec<AuthorityId>, endowed_accounts: Vec<
 			key: upgrade_key,
 			_genesis_phantom_data: Default::default(),
 		}),
+        adex_v3: Some(AdExConfig {
+            payment: 1000,
+            _genesis_phantom_data: Default::default(),
+        }),
 	}
 }
