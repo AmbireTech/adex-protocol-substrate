@@ -2,24 +2,24 @@ use parity_codec::Encode;
 use srml_support::{StorageValue, dispatch::Result};
 use {balances, system::{self, ensure_signed}};
 use runtime_primitives::traits::Member;
-
 pub trait Trait: balances::Trait {}
+
+extern crate substrate_primitives as primitives;
+type AccountId = primitives::H256;
 
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
 #[derive(Encode, Decode, Clone, PartialEq, Eq)]
-pub struct Channel<AccountId, Balance> where AccountId: Member, Balance: Member {
-	#[cfg_attr(feature = "std", serde(deserialize_with="AccountId::deserialize"))]
+pub struct Channel {
     creator: AccountId,
-	#[cfg_attr(feature = "std", serde(deserialize_with="Balance::deserialize"))]
-    deposit: Balance,
-    //validators: Vec<AccountId>,
+    deposit: u128,
+    validators: Vec<AccountId>,
     valid_until: u64,
     spec: Vec<u8>,
 }
 
 decl_module! {
 	pub struct Module<T: Trait> for enum Call where origin: T::Origin {
-		fn channel_start(origin, channel: Channel<T::AccountId, T::AccountId>) -> Result {
+		fn channel_start(origin, channel: Channel) -> Result {
             let sender = ensure_signed(origin)?;
 
 		    //<balances::Module<T>>::decrease_free_balance(&sender, payment)?;
