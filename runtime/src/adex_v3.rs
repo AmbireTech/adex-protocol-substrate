@@ -1,6 +1,5 @@
-use parity_codec::Encode;
 use srml_support::{StorageValue, dispatch::Result};
-use {balances, system::{self, ensure_signed}};
+use {balances, system::ensure_signed};
 
 pub trait Trait: balances::Trait {}
 
@@ -41,11 +40,11 @@ decl_module! {
 
 decl_storage! {
 	trait Store for Module<T: Trait> as AdExV3 {
-            Payment get(payment) config(): u32;
-            //State: map T::Hash => u32;
-            //Withdrawn: map T::Hash => T::Balance;
-            // this should either be a 2d map or the hash should be hash(channelId, accountId)
-            //WithdrawnPerUser: map T::Hash => T::Balance;
+            // payment is a dummy to make decl_storage! generate a GenesisConfig
+            pub Payment get(payment) config(): Option<T::Balance>;
+            pub State get(state): map T::Hash => Option<u32>;
+            pub Withdrawn get(withdrawn): map T::Hash => Option<T::Balance>;
+            pub WithdrawnPerUser get(withdrawn_per_user): map (T::Hash, T::AccountId) => Option<T::Balance>;
 	}
 }
 
