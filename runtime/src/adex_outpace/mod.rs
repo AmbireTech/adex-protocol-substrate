@@ -11,21 +11,21 @@ pub trait Trait: balances::Trait {}
 decl_module! {
     pub struct Module<T: Trait> for enum Call where origin: T::Origin {
         fn channel_start(origin, channel: Channel<T::AccountId, T::Balance>) -> Result {
-            // @TODO: should this be an assert! ?
-            channel.is_sender_creator(ensure_signed(origin)?)?;
+            let sender = ensure_signed(origin)?;
+            ensure!(sender == channel.creator, "the sender must be channel.creator");
             let channel_hash = T::Hashing::hash_of(&channel);
-            // @TODO: can we use exists() here?
+            ensure!(!<State<T>>::exists(&channel_hash), "channel already exists");
             // @TODO: is_valid
-            ensure!(<State<T>>::get(&channel_hash) == None, "The channel must be unknown");
             <balances::Module<T>>::decrease_free_balance(&channel.creator, channel.deposit)?;
             <State<T>>::insert(&channel_hash, ChannelState::Active);
             Ok(())
         }
 
         fn channel_withdraw_expired(origin, channel: Channel<T::AccountId, T::Balance>) -> Result {
-            channel.is_sender_creator(ensure_signed(origin)?)?;
+            let sender = ensure_signed(origin)?;
+            ensure!(sender == channel.creator, "the sender must be channel.creator");
             let channel_hash = T::Hashing::hash_of(&channel);
-            ensure!(<State<T>>::get(&channel_hash) == Some(ChannelState::Active), "The channel must be active");
+            ensure!(<State<T>>::get(&channel_hash) == Some(ChannelState::Active), "channel must be active");
             // @TODO: check if expired
             // @TODO: only withdraw remaining balance
             <balances::Module<T>>::increase_free_balance_creating(&channel.creator, channel.deposit);
@@ -34,9 +34,10 @@ decl_module! {
         }
 
         fn channel_withdraw(origin, channel: Channel<T::AccountId, T::Balance>) -> Result {
-            channel.is_sender_creator(ensure_signed(origin)?)?;
+            let sender = ensure_signed(origin)?;
+            ensure!(sender == channel.creator, "the sender must be channel.creator");
             let channel_hash = T::Hashing::hash_of(&channel);
-            ensure!(<State<T>>::get(&channel_hash) == Some(ChannelState::Active), "The channel must be active");
+            ensure!(<State<T>>::get(&channel_hash) == Some(ChannelState::Active), "channel must be active");
             // @TODO: check state
             // @TODO check balance leaf and etc.
             Ok(())
