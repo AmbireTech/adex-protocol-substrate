@@ -13,31 +13,35 @@ pub struct Channel<AccountId, Balance> {
 	validators: Vec<AccountId>,
 	spec: Vec<u8>,
 }
+impl<AccountId, Balance> Channel<AccountId, Balance>
+    where AccountId: PartialEq
+{
+    fn is_sender_creator(&self, sender: AccountId) -> Result {
+        match sender == self.creator {
+            true => Ok(()),
+            false => Err("not the channel creator"),
+        }
+    }
+}
 
 decl_module! {
 	pub struct Module<T: Trait> for enum Call where origin: T::Origin {
 		fn channel_start(origin, channel: Channel<T::AccountId, T::Balance>) -> Result {
-			let sender = ensure_signed(origin)?;
-			<balances::Module<T>>::decrease_free_balance(&sender, channel.deposit)?;
+			channel.is_sender_creator(ensure_signed(origin)?)?;
+			<balances::Module<T>>::decrease_free_balance(&channel.creator, channel.deposit)?;
 			// @TODO set state
 			Ok(())
 		}
 
 		fn channel_withdraw_expired(origin, channel: Channel<T::AccountId, T::Balance>) -> Result {
-			let sender = ensure_signed(origin)?;
-	                if sender.clone() != channel.creator {
-                            return Err("not the channel owner");
-                        }
+			channel.is_sender_creator(ensure_signed(origin)?)?;
 		        // @TODO check state
 			<balances::Module<T>>::increase_free_balance_creating(&sender, channel.deposit);
 			Ok(())
 		}
 
 		fn channel_withdraw(origin, channel: Channel<T::AccountId, T::Balance>) -> Result {
-			let sender = ensure_signed(origin)?;
-	                if sender.clone() != channel.creator {
-                            return Err("not the channel owner");
-                        }
+			channel.is_sender_creator(ensure_signed(origin)?)?;
 		        // @TODO check state
 			// @TODO: check state
 			// @TODO check balance leaf and etc.
