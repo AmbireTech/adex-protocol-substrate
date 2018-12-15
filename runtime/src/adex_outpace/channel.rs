@@ -21,4 +21,5 @@ impl<AccountId, Balance> Channel<AccountId, Balance>
     }
 }
 
+#[derive(Decode, Encode, PartialEq)]
 pub enum ChannelState { Active, Expired }
