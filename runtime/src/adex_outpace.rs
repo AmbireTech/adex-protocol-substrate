@@ -39,7 +39,7 @@ decl_module! {
 }
 
 decl_storage! {
-	trait Store for Module<T: Trait> as AdExV3 {
+	trait Store for Module<T: Trait> as AdExOUTPACE {
             // payment is a dummy to make decl_storage! generate a GenesisConfig
             pub Payment get(payment) config(): Option<T::Balance>;
             pub State get(state): map T::Hash => Option<u32>;
