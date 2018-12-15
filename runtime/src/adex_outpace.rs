@@ -25,12 +25,20 @@ decl_module! {
 
 		fn channel_withdraw_expired(origin, channel: Channel<T::AccountId, T::Balance>) -> Result {
 			let sender = ensure_signed(origin)?;
-			// @TODO check state
+	                if sender.clone() != channel.creator {
+                            return Err("not the channel owner");
+                        }
+		        // @TODO check state
 			<balances::Module<T>>::increase_free_balance_creating(&sender, channel.deposit);
 			Ok(())
 		}
 
 		fn channel_withdraw(origin, channel: Channel<T::AccountId, T::Balance>) -> Result {
+			let sender = ensure_signed(origin)?;
+	                if sender.clone() != channel.creator {
+                            return Err("not the channel owner");
+                        }
+		        // @TODO check state
 			// @TODO: check state
 			// @TODO check balance leaf and etc.
 			Ok(())

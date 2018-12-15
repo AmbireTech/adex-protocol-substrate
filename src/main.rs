@@ -22,7 +22,6 @@ extern crate substrate_finality_grandpa as grandpa;
 #[macro_use]
 extern crate substrate_service;
 extern crate adex_protocol_substrate_runtime;
-#[macro_use]
 extern crate structopt;
 
 mod chain_spec;
