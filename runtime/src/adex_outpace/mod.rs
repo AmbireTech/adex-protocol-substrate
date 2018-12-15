@@ -11,21 +11,26 @@ decl_module! {
     pub struct Module<T: Trait> for enum Call where origin: T::Origin {
         fn channel_start(origin, channel: Channel<T::AccountId, T::Balance>) -> Result {
             channel.is_sender_creator(ensure_signed(origin)?)?;
+            let id = channel.id();
+            assert!(<State<T>>::get(&id) == None, "The channel must be unknown");
             <balances::Module<T>>::decrease_free_balance(&channel.creator, channel.deposit)?;
-            <State<T>>::insert(channel.id(), ChannelState::Active as u32);
+            <State<T>>::insert(&id, ChannelState::Active as u32);
             Ok(())
         }
 
         fn channel_withdraw_expired(origin, channel: Channel<T::AccountId, T::Balance>) -> Result {
             channel.is_sender_creator(ensure_signed(origin)?)?;
-            assert!(<State<T>>::get(channel.id()) == Some(ChannelState::Active as u32), "The channel must be active");
+            let id = channel.id();
+            assert!(<State<T>>::get(&id) == Some(ChannelState::Active as u32), "The channel must be active");
             <balances::Module<T>>::increase_free_balance_creating(&channel.creator, channel.deposit);
+            <State<T>>::insert(id, ChannelState::Expired as u32);
             Ok(())
         }
 
         fn channel_withdraw(origin, channel: Channel<T::AccountId, T::Balance>) -> Result {
             channel.is_sender_creator(ensure_signed(origin)?)?;
-            // @TODO check state
+            let id = channel.id();
+            assert!(<State<T>>::get(&id) == Some(ChannelState::Active as u32), "The channel must be active");
             // @TODO: check state
             // @TODO check balance leaf and etc.
             Ok(())

@@ -26,4 +26,4 @@ impl<AccountId, Balance> Channel<AccountId, Balance>
     }
 }
 
-pub enum ChannelState { Unknown, Active, Expired }
+pub enum ChannelState { Active, Expired }
