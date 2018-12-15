@@ -1,9 +1,9 @@
-use srml_support::{StorageValue, dispatch::Result};
+use srml_support::{StorageMap, StorageValue, dispatch::Result};
 use {balances, system::ensure_signed};
 
 pub mod channel;
 
-use self::channel::Channel;
+use self::channel::{Channel, ChannelState, ChannelId};
 
 pub trait Trait: balances::Trait {}
 
@@ -12,13 +12,13 @@ decl_module! {
         fn channel_start(origin, channel: Channel<T::AccountId, T::Balance>) -> Result {
             channel.is_sender_creator(ensure_signed(origin)?)?;
             <balances::Module<T>>::decrease_free_balance(&channel.creator, channel.deposit)?;
-            // @TODO set state
+            <State<T>>::insert(channel.id(), ChannelState::Active as u32);
             Ok(())
         }
 
         fn channel_withdraw_expired(origin, channel: Channel<T::AccountId, T::Balance>) -> Result {
             channel.is_sender_creator(ensure_signed(origin)?)?;
-            // @TODO check state
+            assert!(<State<T>>::get(channel.id()) == Some(ChannelState::Active as u32), "The channel must be active");
             <balances::Module<T>>::increase_free_balance_creating(&channel.creator, channel.deposit);
             Ok(())
         }
@@ -36,9 +36,9 @@ decl_module! {
 decl_storage! {
     trait Store for Module<T: Trait> as AdExOUTPACE {
         Dummy get(dummy) config(): u32; // needed for GenesisConfig generation
-        pub State get(state): map T::Hash => Option<u32>;
-        pub Withdrawn get(withdrawn): map T::Hash => Option<T::Balance>;
-        pub WithdrawnPerUser get(withdrawn_per_user): map (T::Hash, T::AccountId) => Option<T::Balance>;
+        pub State get(state): map ChannelId => Option<u32>;
+        pub Withdrawn get(withdrawn): map ChannelId => Option<T::Balance>;
+        pub WithdrawnPerUser get(withdrawn_per_user): map (ChannelId, T::AccountId) => Option<T::Balance>;
     }
 }
 

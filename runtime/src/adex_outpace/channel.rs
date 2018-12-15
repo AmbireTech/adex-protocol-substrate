@@ -1,5 +1,7 @@
 use srml_support::dispatch::Result;
 
+pub type ChannelId = Vec<u8>;
+
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
 #[derive(Encode, Decode, Clone, PartialEq, Eq)]
 pub struct Channel<AccountId, Balance> {
@@ -13,6 +15,9 @@ pub struct Channel<AccountId, Balance> {
 impl<AccountId, Balance> Channel<AccountId, Balance>
     where AccountId: PartialEq
 {
+    pub fn id(&self) -> ChannelId {
+        vec![0,0,0,0]
+    }
     pub fn is_sender_creator(&self, sender: AccountId) -> Result {
         match sender == self.creator {
             true => Ok(()),
@@ -21,4 +26,4 @@ impl<AccountId, Balance> Channel<AccountId, Balance>
     }
 }
 
-
+pub enum ChannelState { Unknown, Active, Expired }
