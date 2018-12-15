@@ -16,7 +16,7 @@ decl_module! {
             let channel_hash = T::Hashing::hash_of(&channel);
             // @TODO: can we use exists() here?
             // @TODO: is_valid
-            assert!(<State<T>>::get(&channel_hash) == None, "The channel must be unknown");
+            ensure!(<State<T>>::get(&channel_hash) == None, "The channel must be unknown");
             <balances::Module<T>>::decrease_free_balance(&channel.creator, channel.deposit)?;
             <State<T>>::insert(&channel_hash, ChannelState::Active as u32);
             Ok(())
@@ -25,7 +25,7 @@ decl_module! {
         fn channel_withdraw_expired(origin, channel: Channel<T::AccountId, T::Balance>) -> Result {
             channel.is_sender_creator(ensure_signed(origin)?)?;
             let channel_hash = T::Hashing::hash_of(&channel);
-            assert!(<State<T>>::get(&channel_hash) == Some(ChannelState::Active as u32), "The channel must be active");
+            ensure!(<State<T>>::get(&channel_hash) == Some(ChannelState::Active as u32), "The channel must be active");
             // @TODO: check if expired
             // @TODO: only withdraw remaining balance
             <balances::Module<T>>::increase_free_balance_creating(&channel.creator, channel.deposit);
@@ -36,7 +36,7 @@ decl_module! {
         fn channel_withdraw(origin, channel: Channel<T::AccountId, T::Balance>) -> Result {
             channel.is_sender_creator(ensure_signed(origin)?)?;
             let channel_hash = T::Hashing::hash_of(&channel);
-            assert!(<State<T>>::get(&channel_hash) == Some(ChannelState::Active as u32), "The channel must be active");
+            ensure!(<State<T>>::get(&channel_hash) == Some(ChannelState::Active as u32), "The channel must be active");
             // @TODO: check state
             // @TODO check balance leaf and etc.
             Ok(())
