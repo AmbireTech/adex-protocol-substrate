@@ -50,8 +50,8 @@ decl_module! {
 			// ensure!(channel.is_signed_by_supermajority(to_sign, signatures), "state must be signed");
 			let balance_leaf = T::Hashing::hash_of(&Both{ a: sender, b: amountInTree });
 			let is_contained = state_root == proof.iter().fold(balance_leaf, |a, b| {
-				//T::Hashing::hash_of(if a > b { &a } else { &b })
-				T::Hashing::hash_of(&a)
+				// https://github.com/paritytech/parity-common/blob/master/fixed-hash/src/hash.rs#L101
+				T::Hashing::hash_of(if a.as_ref() < b.as_ref() { &a } else { &b })
 			});
 			ensure!(is_contained, "balance leaf not found");
 			// @TODO; withdraw the actual balance, check Withdrawn, WithdrawnPerUser
