@@ -1,4 +1,4 @@
-use srml_support::{StorageMap, StorageValue, dispatch::Result};
+use srml_support::{StorageMap, dispatch::Result};
 use {balances, system::ensure_signed};
 use runtime_primitives::traits::Hash;
 
@@ -47,7 +47,6 @@ decl_module! {
 
 decl_storage! {
     trait Store for Module<T: Trait> as AdExOUTPACE {
-        Dummy get(dummy) config(): u32; // needed for GenesisConfig generation
         pub State get(state): map T::Hash => Option<ChannelState>;
         pub Withdrawn get(withdrawn): map T::Hash => T::Balance;
         pub WithdrawnPerUser get(withdrawn_per_user): map (T::Hash, T::AccountId) => T::Balance;

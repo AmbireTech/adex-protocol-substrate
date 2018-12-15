@@ -190,7 +190,7 @@ construct_runtime!(
 		Timestamp: timestamp::{Module, Call, Storage, Config<T>, Inherent},
 		Consensus: consensus::{Module, Call, Storage, Config<T>, Log(AuthoritiesChange), Inherent},
 		Balances: balances,
-                AdExOUTPACE: adex_outpace::{Module, Call, Storage, Config<T>},
+		AdExOUTPACE: adex_outpace::{Module, Call, Storage},
 		UpgradeKey: upgrade_key,
 	}
 );
