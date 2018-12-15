@@ -9,9 +9,7 @@ use self::channel::{Channel, ChannelState};
 pub trait Trait: balances::Trait {}
 
 #[derive(Encode, Decode)]
-struct ToSign<Hash> { channel_hash: Hash, state_root: Hash }
-#[derive(Encode, Decode)]
-struct BalanceLeaf<AccountId> { account: AccountId, amount: u64 }
+struct Both<A, B> { a: A, b: B }
 
 decl_module! {
 	pub struct Module<T: Trait> for enum Call where origin: T::Origin {
@@ -48,9 +46,9 @@ decl_module! {
 			let channel_hash = T::Hashing::hash_of(&channel);
 			ensure!(<State<T>>::get(&channel_hash) == Some(ChannelState::Active), "channel must be active");
 			// @TODO: check if NOT expired
-			let to_sign = T::Hashing::hash_of(&ToSign{ channel_hash: channel_hash, state_root: state_root });
+			let to_sign = T::Hashing::hash_of(&Both{ a: channel_hash, b: state_root });
 			// ensure!(channel.is_signed_by_supermajority(to_sign, signatures), "state must be signed");
-			let balance_leaf = T::Hashing::hash_of(&BalanceLeaf{ account: sender, amount: amountInTree });
+			let balance_leaf = T::Hashing::hash_of(&Both{ a: sender, b: amountInTree });
 			let is_contained = state_root == proof.iter().fold(balance_leaf, |a, b| {
 				//T::Hashing::hash_of(if a > b { &a } else { &b })
 				T::Hashing::hash_of(&a)
