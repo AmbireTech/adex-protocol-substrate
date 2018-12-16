@@ -99,7 +99,12 @@ decl_module! {
 			let balance_leaf = T::Hashing::hash_of(&Both{ a: sender.clone(), b: amount_in_tree });
 			let is_contained = state_root == proof.iter()
 				.fold(balance_leaf, |a, b| {
-					T::Hashing::hash_of(if a.as_ref() < b.as_ref() { &a } else { &b })
+					let combined = if a.as_ref() < b.as_ref() {
+						Both{ a: a.clone(), b: b.clone() }
+					} else {
+						Both{ a: b.clone(), b: a.clone() }
+					};
+					T::Hashing::hash_of(&combined)
 				});
 			ensure!(is_contained, "balance leaf not found");
 
