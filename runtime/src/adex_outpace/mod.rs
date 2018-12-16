@@ -104,13 +104,14 @@ decl_module! {
 			ensure!(is_contained, "balance leaf not found");
 
 			// Calculate how much the user has left to withdraw
-			let withdrawn_so_far = Self::withdrawn_per_user((channel_hash.clone(), sender.clone()));
+			let withdrawn_key = (channel_hash.clone(), sender.clone());
+			let withdrawn_so_far = Self::withdrawn_per_user(&withdrawn_key);
 			ensure!(
 				amount_in_tree > withdrawn_so_far,
 				"amount_in_tree should be larger"
 			);
 			let to_withdraw = amount_in_tree - withdrawn_so_far;
-			<WithdrawnPerUser<T>>::insert((channel_hash.clone(), sender.clone()), amount_in_tree);
+			<WithdrawnPerUser<T>>::insert(&withdrawn_key, amount_in_tree);
 
 			// Ensure it's not possible to withdraw more than the channel balance
 			let withdrawn_total = Self::withdrawn(&channel_hash) + to_withdraw;
