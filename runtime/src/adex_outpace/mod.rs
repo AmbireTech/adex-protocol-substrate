@@ -44,7 +44,7 @@ decl_module! {
 			state_root: T::Hash,
 			signatures: Vec<Signature>,
 			proof: Vec<T::Hash>,
-			amountInTree: u64
+			amount_in_tree: T::Balance
 		) -> Result {
 			let sender = ensure_signed(origin)?;
 			let channel_hash = T::Hashing::hash_of(&channel);
@@ -64,14 +64,21 @@ decl_module! {
 			ensure!(valid_sigs*3 >= channel.validators.len()*2, "state must be signed by a validator supermajority");
 
 			// Check the merkle inclusion proof for the balance leaf
-			let balance_leaf = T::Hashing::hash_of(&Both{ a: sender, b: amountInTree });
+			let balance_leaf = T::Hashing::hash_of(&Both{ a: sender.clone(), b: amount_in_tree });
 			let is_contained = state_root == proof.iter().fold(balance_leaf, |a, b| {
-				// https://github.com/paritytech/parity-common/blob/master/fixed-hash/src/hash.rs#L101
 				T::Hashing::hash_of(if a.as_ref() < b.as_ref() { &a } else { &b })
 			});
 			ensure!(is_contained, "balance leaf not found");
 
-			// @TODO; withdraw the actual balance, check Withdrawn, WithdrawnPerUser
+			// Calculate how much the user has left to withdraw
+			let withdrawn_so_far = Self::withdrawn_per_user((channel_hash.clone(), sender.clone()));
+			ensure!(amount_in_tree > withdrawn_so_far, "amount_in_tree should be larger");
+			let to_withdraw = amount_in_tree - withdrawn_so_far;
+
+			// Ensure it's not possible to withdraw more than the channel balance
+			let withdrawn_total = <Withdrawn<T>>::get(&channel_hash) + to_withdraw;
+			ensure!(withdrawn_total <= channel.deposit, "total withdrawn must not exceed channel deposit");
+
 			Ok(())
 		}
 	}
