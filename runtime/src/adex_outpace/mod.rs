@@ -7,7 +7,9 @@ pub mod channel;
 
 use self::channel::{Channel, ChannelState};
 
-pub trait Trait: balances::Trait + timestamp::Trait {}
+pub trait Trait: balances::Trait + timestamp::Trait {
+	type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
+}
 
 #[derive(Encode, Decode)]
 struct Both<A, B> { a: A, b: B }
@@ -19,6 +21,8 @@ type Signature = ed25519::Signature;
 
 decl_module! {
 	pub struct Module<T: Trait> for enum Call where origin: T::Origin {
+		fn deposit_event() = default;
+
 		fn channel_start(origin, channel: Channel<T::AccountId, T::Balance, T::Moment>) -> Result {
 			ensure!(ensure_signed(origin)? == channel.creator, "the sender must be channel.creator");
 			ensure!(channel.is_valid(), "the channel must be valid");
@@ -30,6 +34,7 @@ decl_module! {
 			);
 			<State<T>>::insert(&channel_hash, ChannelState::Active);
 			<balances::Module<T>>::decrease_free_balance(&channel.creator, channel.deposit)?;
+			Self::deposit_event(RawEvent::ChannelOpen(channel_hash));
 			Ok(())
 		}
 
@@ -53,6 +58,7 @@ decl_module! {
 			let to_withdraw = channel.deposit - Self::withdrawn(&channel_hash);
 			<balances::Module<T>>::increase_free_balance_creating(&channel.creator, to_withdraw);
 
+			Self::deposit_event(RawEvent::ChannelWithdrawExpired(channel_hash, to_withdraw));
 			Ok(())
 		}
 
@@ -128,6 +134,7 @@ decl_module! {
 
 			<balances::Module<T>>::increase_free_balance_creating(&sender, to_withdraw);
 
+			Self::deposit_event(RawEvent::ChannelWithdraw(sender, channel_hash, to_withdraw));
 			Ok(())
 		}
 	}
@@ -140,6 +147,18 @@ decl_storage! {
 		pub WithdrawnPerUser get(withdrawn_per_user): map (T::Hash, T::AccountId) => T::Balance;
 	}
 }
+
+decl_event!(
+        pub enum Event<T> where
+		<T as system::Trait>::Hash,
+		<T as system::Trait>::AccountId,
+		<T as balances::Trait>::Balance
+	{
+		ChannelOpen(Hash),
+		ChannelWithdrawExpired(Hash, Balance),
+		ChannelWithdraw(AccountId, Hash, Balance),
+	}
+);
 
 impl<T: Trait> Module<T> {}
 

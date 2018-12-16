@@ -179,7 +179,9 @@ impl upgrade_key::Trait for Runtime {
 	type Event = Event;
 }
 
-impl adex_outpace::Trait for Runtime {}
+impl adex_outpace::Trait for Runtime {
+	type Event = Event;
+}
 
 construct_runtime!(
 	pub enum Runtime with Log(InternalLog: DigestItem<Hash, AuthorityId>) where
@@ -190,7 +192,7 @@ construct_runtime!(
 		Timestamp: timestamp::{Module, Call, Storage, Config<T>, Inherent},
 		Consensus: consensus::{Module, Call, Storage, Config<T>, Log(AuthoritiesChange), Inherent},
 		Balances: balances,
-		AdExOUTPACE: adex_outpace::{Module, Call, Storage},
+		AdExOUTPACE: adex_outpace::{Module, Call, Storage, Event<T>},
 		UpgradeKey: upgrade_key,
 	}
 );
