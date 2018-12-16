@@ -1,7 +1,11 @@
 use srml_support::{StorageMap, dispatch::Result};
 use {balances, timestamp, system::ensure_signed};
 use runtime_primitives::traits::Hash;
+
 use primitives::ed25519;
+
+extern crate sr_std as rstd;
+use rstd::prelude::*;
 
 pub mod channel;
 

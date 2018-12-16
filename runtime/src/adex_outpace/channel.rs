@@ -1,4 +1,5 @@
 use primitives::H256;
+use rstd::prelude::*;
 
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
 #[derive(Encode, Decode, Clone, PartialEq, Eq)]
