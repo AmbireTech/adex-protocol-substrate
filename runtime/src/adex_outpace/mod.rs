@@ -1,5 +1,5 @@
 use srml_support::{StorageMap, dispatch::Result};
-use {balances, system::ensure_signed};
+use {balances, timestamp, system::ensure_signed};
 use runtime_primitives::traits::Hash;
 use primitives::ed25519;
 
@@ -7,7 +7,7 @@ pub mod channel;
 
 use self::channel::{Channel, ChannelState};
 
-pub trait Trait: balances::Trait {}
+pub trait Trait: balances::Trait + timestamp::Trait {}
 
 #[derive(Encode, Decode)]
 struct Both<A, B> { a: A, b: B }
@@ -19,7 +19,7 @@ type Signature = ed25519::Signature;
 
 decl_module! {
 	pub struct Module<T: Trait> for enum Call where origin: T::Origin {
-		fn channel_start(origin, channel: Channel<T::AccountId, T::Balance>) -> Result {
+		fn channel_start(origin, channel: Channel<T::AccountId, T::Balance, T::Moment>) -> Result {
 			ensure!(
 				ensure_signed(origin)? == channel.creator,
 				"the sender must be channel.creator"
@@ -34,7 +34,7 @@ decl_module! {
 			Ok(())
 		}
 
-		fn channel_withdraw_expired(origin, channel: Channel<T::AccountId, T::Balance>) -> Result {
+		fn channel_withdraw_expired(origin, channel: Channel<T::AccountId, T::Balance, T::Moment>) -> Result {
 			ensure!(
 				ensure_signed(origin)? == channel.creator,
 				"the sender must be channel.creator"
@@ -43,6 +43,10 @@ decl_module! {
 			ensure!(
 				<State<T>>::get(&channel_hash) == Some(ChannelState::Active),
 				"channel must be active"
+			);
+			ensure!(
+				<timestamp::Module<T>>::get() > channel.valid_until,
+				"channel must be expired"
 			);
 
 			<State<T>>::insert(channel_hash, ChannelState::Expired);
@@ -55,7 +59,7 @@ decl_module! {
 
 		fn channel_withdraw(
 			origin,
-			channel: Channel<T::AccountId, T::Balance>,
+			channel: Channel<T::AccountId, T::Balance, T::Moment>,
 			state_root: T::Hash,
 			signatures: Vec<Signature>,
 			proof: Vec<T::Hash>,
@@ -63,11 +67,16 @@ decl_module! {
 		) -> Result {
 			let sender = ensure_signed(origin)?;
 			let channel_hash = T::Hashing::hash_of(&channel);
+
+			// Check if the channel is in an Active state and not expired
 			ensure!(
 				<State<T>>::get(&channel_hash) == Some(ChannelState::Active),
 				"channel must be active"
 			);
-			// @TODO: check if NOT expired
+			ensure!(
+				<timestamp::Module<T>>::get() <= channel.valid_until,
+				"channel must not be expired"
+			);
 
 			// Check if the state is signed by a supermajority of validators
 			ensure!(
@@ -93,10 +102,7 @@ decl_module! {
 				.fold(balance_leaf, |a, b| {
 					T::Hashing::hash_of(if a.as_ref() < b.as_ref() { &a } else { &b })
 				});
-			ensure!(
-				is_contained,
-				"balance leaf not found"
-			);
+			ensure!(is_contained, "balance leaf not found");
 
 			// Calculate how much the user has left to withdraw
 			let withdrawn_so_far = Self::withdrawn_per_user((channel_hash.clone(), sender.clone()));
