@@ -1,3 +1,5 @@
+use primitives::H256;
+
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
 #[derive(Encode, Decode, Clone, PartialEq, Eq)]
 pub struct Channel<AccountId, Balance> {
@@ -5,7 +7,7 @@ pub struct Channel<AccountId, Balance> {
 	pub deposit: Balance,
 	// @TODO should valid_until be some sort of substrate-specific lifetime value?
 	pub valid_until: u64,
-	pub validators: Vec<AccountId>,
+	pub validators: Vec<H256>,
 	pub spec: Vec<u8>,
 }
 

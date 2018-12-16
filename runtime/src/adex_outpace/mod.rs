@@ -1,6 +1,7 @@
 use srml_support::{StorageMap, dispatch::Result};
 use {balances, system::ensure_signed};
 use runtime_primitives::traits::Hash;
+use primitives::ed25519;
 
 pub mod channel;
 
@@ -11,6 +12,9 @@ pub trait Trait: balances::Trait {}
 #[derive(Encode, Decode)]
 struct Both<A, B> { a: A, b: B }
 
+type Signature = ed25519::Signature;
+
+// @TODO: format ensure! better, separate lines
 decl_module! {
 	pub struct Module<T: Trait> for enum Call where origin: T::Origin {
 		fn channel_start(origin, channel: Channel<T::AccountId, T::Balance>) -> Result {
@@ -38,7 +42,7 @@ decl_module! {
 			origin,
 			channel: Channel<T::AccountId, T::Balance>,
 			state_root: T::Hash,
-			signatures: Vec<u8>,
+			signatures: Vec<Signature>,
 			proof: Vec<T::Hash>,
 			amountInTree: u64
 		) -> Result {
@@ -46,14 +50,27 @@ decl_module! {
 			let channel_hash = T::Hashing::hash_of(&channel);
 			ensure!(<State<T>>::get(&channel_hash) == Some(ChannelState::Active), "channel must be active");
 			// @TODO: check if NOT expired
+
+			// Check if the state is signed by a supermajority of validators
+			ensure!(signatures.len() == channel.validators.len(), "signatures must be as many as validators");
 			let to_sign = T::Hashing::hash_of(&Both{ a: channel_hash, b: state_root });
-			// ensure!(channel.is_signed_by_supermajority(to_sign, signatures), "state must be signed");
+			let valid_sigs = signatures.iter()
+				.zip(channel.validators.iter())
+				.filter(|(sig, validator)| {
+					let public = ed25519::Public::from_raw(validator.to_fixed_bytes());
+					ed25519::verify_strong(sig, to_sign.as_ref(), public)
+				})
+				.count();
+			ensure!(valid_sigs*3 >= channel.validators.len()*2, "state must be signed by a validator supermajority");
+
+			// Check the merkle inclusion proof for the balance leaf
 			let balance_leaf = T::Hashing::hash_of(&Both{ a: sender, b: amountInTree });
 			let is_contained = state_root == proof.iter().fold(balance_leaf, |a, b| {
 				// https://github.com/paritytech/parity-common/blob/master/fixed-hash/src/hash.rs#L101
 				T::Hashing::hash_of(if a.as_ref() < b.as_ref() { &a } else { &b })
 			});
 			ensure!(is_contained, "balance leaf not found");
+
 			// @TODO; withdraw the actual balance, check Withdrawn, WithdrawnPerUser
 			Ok(())
 		}
