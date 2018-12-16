@@ -2,7 +2,9 @@ use srml_support::{StorageMap, dispatch::Result};
 use {balances, timestamp, system::ensure_signed};
 use runtime_primitives::traits::Hash;
 
-//use primitives::ed25519;
+#[cfg(test)]
+extern crate sr_io as runtime_io;
+use runtime_io::ed25519_verify;
 
 extern crate sr_std as rstd;
 use rstd::prelude::*;
@@ -18,8 +20,7 @@ pub trait Trait: balances::Trait + timestamp::Trait {
 #[derive(Encode, Decode)]
 struct Both<A, B> { a: A, b: B }
 
-//type Signature = ed25519::Signature;
-type Signature = primitives::H256;
+type Signature = primitives::H512;
 
 // Implements OUTPACE: https://github.com/AdExNetwork/adex-protocol/blob/master/OUTPACE.md
 // Off-chain Unidirectional Trustless PAyment ChannEls
@@ -97,9 +98,7 @@ decl_module! {
 			let valid_sigs = signatures.iter()
 				.zip(channel.validators.iter())
 				.filter(|(sig, validator)| {
-					//let public = ed25519::Public::from_raw(validator.to_fixed_bytes());
-					//ed25519::verify_strong(sig, to_sign.as_ref(), public)
-                                        true
+					ed25519_verify(&sig.to_fixed_bytes(), to_sign.as_ref(), validator.to_fixed_bytes())
 				})
 				.count();
 			ensure!(
