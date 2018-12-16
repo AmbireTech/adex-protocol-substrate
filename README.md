@@ -7,13 +7,13 @@ The [AdEx Protocol](https://github.com/AdExNetwork/adex-protocol) implemented on
 
 ### OUTPACE
 
-The [`AdExOUTPACE`](https://github.com/AdExNetwork/adex-protocol-substrate/tree/rebase/runtime/src/adex_outpace) module implements **O**ffchain **U**nidirectional **Pa**yment **C**hann**e**ls described here: https://github.com/AdExNetwork/adex-protocol/blob/master/OUTPACE.md
+The [`AdExOUTPACE`](https://github.com/AdExNetwork/adex-protocol-substrate/tree/rebase/runtime/src/adex_outpace) module implements **O**ffchain **U**nidirectional **T**rustless **Pa**yment **C**hann**e**ls described here: https://github.com/AdExNetwork/adex-protocol/blob/master/OUTPACE.md
 
 The OUTPACE module consists of:
 
-* `channel_open`:
-* `channel_withdraw_expired`:
-* `channel_withdraw`: 
+* `channel_open`: opens a channel, therefore locking up a deposit
+* `channel_withdraw_expired`: after the channel is expired, the creator may invoke this to withdraw the remainder of their deposit
+* `channel_withdraw`: at any time before expiry, anyone who earned from this channel may withdraw their earnings
 
 ### Registry
 
