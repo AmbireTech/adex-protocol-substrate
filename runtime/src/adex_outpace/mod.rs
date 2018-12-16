@@ -51,7 +51,7 @@ decl_module! {
 
 			<State<T>>::insert(channel_hash, ChannelState::Expired);
 
-			let to_withdraw =channel.deposit - Self::withdrawn(&channel_hash);
+			let to_withdraw = channel.deposit - Self::withdrawn(&channel_hash);
 			<balances::Module<T>>::increase_free_balance_creating(&channel.creator, to_withdraw);
 
 			Ok(())
@@ -111,6 +111,7 @@ decl_module! {
 				"amount_in_tree should be larger"
 			);
 			let to_withdraw = amount_in_tree - withdrawn_so_far;
+			<WithdrawnPerUser<T>>::insert((channel_hash.clone(), sender.clone()), amount_in_tree);
 
 			// Ensure it's not possible to withdraw more than the channel balance
 			let withdrawn_total = Self::withdrawn(&channel_hash) + to_withdraw;
@@ -118,6 +119,7 @@ decl_module! {
 				withdrawn_total <= channel.deposit,
 				"total withdrawn must not exceed channel deposit"
 			);
+			<Withdrawn<T>>::insert(&channel_hash, withdrawn_total);
 
 			<balances::Module<T>>::increase_free_balance_creating(&sender, to_withdraw);
 
