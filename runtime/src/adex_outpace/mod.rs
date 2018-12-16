@@ -28,7 +28,7 @@ decl_module! {
 	pub struct Module<T: Trait> for enum Call where origin: T::Origin {
 		fn deposit_event() = default;
 
-		fn channel_start(origin, channel: Channel<T::AccountId, T::Balance, T::Moment>) -> Result {
+		fn channel_open(origin, channel: Channel<T::AccountId, T::Balance, T::Moment>) -> Result {
 			ensure!(ensure_signed(origin)? == channel.creator, "the sender must be channel.creator");
 			ensure!(channel.is_valid(), "the channel must be valid");
 
