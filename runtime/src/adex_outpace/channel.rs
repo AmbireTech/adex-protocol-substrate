@@ -9,6 +9,14 @@ pub struct Channel<AccountId, Balance, Moment> {
 	pub validators: Vec<H256>,
 	pub spec: Vec<u8>,
 }
+impl<AccountId, Balance, Moment> Channel<AccountId, Balance, Moment>
+    where Moment: PartialOrd
+{
+    pub fn is_valid(&self) -> bool {
+        self.validators.len() >= 2
+            && self.validators.len() <= 256
+    }
+}
 
 #[derive(Decode, Encode, PartialEq)]
 pub enum ChannelState { Active, Expired }
