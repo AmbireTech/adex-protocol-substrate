@@ -17,7 +17,7 @@ The OUTPACE module consists of:
 
 ### Registry
 
-The upcoming AdExRegistry module implements the AdEx registry.
+The upcoming `AdExRegistry` module implements the AdEx registry.
 
 It is a component where AdEx validators can stake tokens to get exposure. Furhermore, users may launch challenges against validators to prove their misbehavior. Most of the challenges involve replicating the off-chain behavior of the [validator stack](https://github.com/adexnetwork/adex-validator-stack-js), employing a pattern referred to as counterfactuality.
 
@@ -26,6 +26,7 @@ For more details, read https://github.com/AdExNetwork/adex-protocol/issues/7
 ## Build and run
 
 ```
+./build.sh
 cargo run -- --dev
 ```
 
