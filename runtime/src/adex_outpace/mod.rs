@@ -124,7 +124,7 @@ decl_module! {
 			let withdrawn_so_far = Self::withdrawn_per_user(&withdrawn_key);
 			ensure!(
 				amount_in_tree > withdrawn_so_far,
-				"amount_in_tree should be larger"
+				"amount_in_tree should be larger than withdrawn_so_far"
 			);
 			let to_withdraw = amount_in_tree - withdrawn_so_far;
 			<WithdrawnPerUser<T>>::insert(&withdrawn_key, amount_in_tree);
