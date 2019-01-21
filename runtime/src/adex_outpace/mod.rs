@@ -18,7 +18,7 @@ pub trait Trait: balances::Trait + timestamp::Trait {
 }
 
 #[derive(Encode, Decode)]
-struct Both<A, B> { a: A, b: B }
+struct Two<A, B> (A, B);
 
 type Signature = primitives::H512;
 
@@ -94,7 +94,7 @@ decl_module! {
 				signatures.len() == channel.validators.len(),
 				"signatures must be as many as validators"
 			);
-			let to_sign = T::Hashing::hash_of(&Both{ a: channel_hash, b: state_root });
+			let to_sign = T::Hashing::hash_of(&Two(channel_hash, state_root));
 			let valid_sigs = signatures.iter()
 				.zip(channel.validators.iter())
 				.filter(|(sig, validator)| {
@@ -107,13 +107,13 @@ decl_module! {
 			);
 
 			// Check the merkle inclusion proof for the balance leaf
-			let balance_leaf = T::Hashing::hash_of(&Both{ a: sender.clone(), b: amount_in_tree });
+			let balance_leaf = T::Hashing::hash_of(&Two(sender.clone(), amount_in_tree));
 			let is_contained = state_root == proof.iter()
 				.fold(balance_leaf, |a, b| {
 					let combined = if a.as_ref() < b.as_ref() {
-						Both{ a: a.clone(), b: b.clone() }
+					        Two(a.clone(), b.clone())
 					} else {
-						Both{ a: b.clone(), b: a.clone() }
+						Two(b.clone(), a.clone())
 					};
 					T::Hashing::hash_of(&combined)
 				});
