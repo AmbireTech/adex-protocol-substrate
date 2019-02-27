@@ -19,6 +19,15 @@ pub trait Trait: balances::Trait + timestamp::Trait {
 
 #[derive(Encode, Decode)]
 struct Two<A, B> (A, B);
+impl<T> Two<T, T> where T: AsRef<[u8]> {
+    fn combine_sorted(a: T, b: T) -> Self {
+            if a.as_ref() < b.as_ref() {
+                    Two(a, b)
+            } else {
+                    Two(b, a)
+            }
+    }
+}
 
 type Signature = primitives::H512;
 
@@ -110,7 +119,7 @@ decl_module! {
 			let balance_leaf = T::Hashing::hash_of(&Two(sender.clone(), amount_in_tree));
 			let is_contained = state_root == proof.iter()
 				.fold(balance_leaf, |a, b| {
-					T::Hashing::hash_of(&combine_sorted(a.clone(), b.clone()))
+					T::Hashing::hash_of(&Two::combine_sorted(a.clone(), b.clone()))
 				});
 			ensure!(is_contained, "balance leaf not found");
 
@@ -137,14 +146,6 @@ decl_module! {
 			Self::deposit_event(RawEvent::ChannelWithdraw(sender, channel_hash, to_withdraw));
 			Ok(())
 		}
-	}
-}
-
-fn combine_sorted<T: AsRef<[u8]>>(a: T, b: T) -> Two<T, T> {
-	if a.as_ref() < b.as_ref() {
-		Two(a, b)
-	} else {
-		Two(b, a)
 	}
 }
 
