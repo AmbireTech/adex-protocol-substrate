@@ -68,9 +68,9 @@ decl_module! {
 				"channel must be expired"
 			);
 
-			<State<T>>::insert(channel_hash, ChannelState::Expired);
-
 			let to_withdraw = channel.deposit - Self::withdrawn(&channel_hash);
+
+			<State<T>>::insert(channel_hash, ChannelState::Expired);
 			<balances::Module<T>>::increase_free_balance_creating(&channel.creator, to_withdraw);
 
 			Self::deposit_event(RawEvent::ChannelWithdrawExpired(channel_hash, to_withdraw));
