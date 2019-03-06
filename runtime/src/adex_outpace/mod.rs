@@ -131,7 +131,6 @@ decl_module! {
 				"amount_in_tree should be larger than withdrawn_so_far"
 			);
 			let to_withdraw = amount_in_tree - withdrawn_so_far;
-			<WithdrawnPerUser<T>>::insert(&withdrawn_key, amount_in_tree);
 
 			// Ensure it's not possible to withdraw more than the channel balance
 			let withdrawn_total = Self::withdrawn(&channel_hash) + to_withdraw;
@@ -139,8 +138,9 @@ decl_module! {
 				withdrawn_total <= channel.deposit,
 				"total withdrawn must not exceed channel deposit"
 			);
-			<Withdrawn<T>>::insert(&channel_hash, withdrawn_total);
 
+			<WithdrawnPerUser<T>>::insert(&withdrawn_key, amount_in_tree);
+			<Withdrawn<T>>::insert(&channel_hash, withdrawn_total);
 			<balances::Module<T>>::increase_free_balance_creating(&sender, to_withdraw);
 
 			Self::deposit_event(RawEvent::ChannelWithdraw(sender, channel_hash, to_withdraw));
